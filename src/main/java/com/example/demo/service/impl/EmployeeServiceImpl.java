@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
-    private EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository){
         super();
@@ -29,30 +29,29 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Employee GetEmployeeById(long id) {
         Optional<Employee> employee= employeeRepository.findById(id);
-        if (employee.isPresent()){
-            return employee.get();
-        }else {
-            return new Employee(); // error
-        }
+        // error
+        return employee.orElseGet(Employee::new);
     }
 
     @Override
     public Employee UpdateEmployee(Employee employee, long id) {
         Optional<Employee> existingEmployee= employeeRepository.findById(id);
-        Employee employee1=existingEmployee.get();
+        Employee employee1;
+        if (existingEmployee.isPresent()){
+            employee1=existingEmployee.get();
+            employee1.setFirstName(employee.getFirstName());
+            employee1.setLastName(employee.getLastName());
+            employee1.setEmail(employee.getEmail());
+            employeeRepository.save(employee1);
+            return employee1;
+        }else {
+            return new Employee(); // error
+        }
 
-        employee1.setFirstName(employee.getFirstName());
-        employee1.setLastName(employee.getLastName());
-        employee1.setEmail(employee.getEmail());
-        employeeRepository.save(employee1);
-
-        return employee1;
     }
 
     @Override
     public void DeleteEmployee(long id) {
-        /*Optional<Employee> existingEmployee= employeeRepository.findById(id);
-        Employee employee1=existingEmployee.get();*/
 
         employeeRepository.deleteById(id);
 
